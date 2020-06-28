@@ -17,6 +17,9 @@
 package org.springframework.beans.factory;
 
 /**
+ * Aware是一个具有标识作用的超级接口，实现该接口的bean是具有被spring 容器通知的能力的，而被通知的方式就是通过回调。
+ * 也就是说：直接或间接实现了这个接口的类，都具有被spring容器通知的能力。
+ *
  * A marker superinterface indicating that a bean is eligible to be notified by the
  * Spring container of a particular framework object through a callback-style method.
  * The actual method signature is determined by individual subinterfaces but should

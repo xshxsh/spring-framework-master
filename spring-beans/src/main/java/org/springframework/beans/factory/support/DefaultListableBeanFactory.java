@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * 综合上面所有功能， 要是对 bean 注册后的处理
+ * 对 bean 注册后的处理
  *
  * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
  * and {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory

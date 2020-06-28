@@ -16,6 +16,8 @@
 
 package org.springframework.core.io;
 
+import org.springframework.util.ResourceUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,12 +30,13 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.util.ResourceUtils;
-
 /**
+ * 将URL解析为文件引用的资源的抽象基类
+ *
  * Abstract base class for resources which resolve URLs into File references,
  * such as {@link UrlResource} or {@link ClassPathResource}.
  *
+ * 检测URL中的“文件”协议以及JBoss的“vfs”协议，相应地解析文件系统引用。
  * <p>Detects the "file" protocol as well as the JBoss "vfs" protocol in URLs,
  * resolving file system references accordingly.
  *

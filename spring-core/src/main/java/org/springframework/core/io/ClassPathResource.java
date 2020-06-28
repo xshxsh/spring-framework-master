@@ -16,18 +16,20 @@
 
 package org.springframework.core.io;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 /**
+ * 类路径资源的{@link Resource}实现。使用给定的{@link ClassLoader}或给定的{@link Class}加载资源
+ *
  * {@link Resource} implementation for class path resources. Uses either a
  * given {@link ClassLoader} or a given {@link Class} for loading resources.
  *

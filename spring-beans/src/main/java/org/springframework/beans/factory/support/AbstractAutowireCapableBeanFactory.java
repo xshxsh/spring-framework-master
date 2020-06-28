@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
 /**
- * 综合 AbstractBeanFactory 并对接口 AutowireCapableBeanFactory 进行实现
+ * 具有Autowire功能的Bean工厂,综合 AbstractBeanFactory 并对接口 AutowireCapableBeanFactory 进行实现
  *
  * Abstract bean factory superclass that implements default bean creation,
  * with the full capabilities specified by the {@link RootBeanDefinition} class.
@@ -126,6 +126,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
+	 * 忽略给定接口的自动装配功能
+	 *
 	 * Create a new AbstractAutowireCapableBeanFactory.
 	 */
 	public AbstractAutowireCapableBeanFactory() {

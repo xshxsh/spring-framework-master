@@ -2,7 +2,7 @@ package com.example;
 
 import com.example.config.Testconfig;
 import com.example.service.TestService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
