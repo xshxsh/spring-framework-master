@@ -380,7 +380,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throws BeanDefinitionStoreException {
 
 		try {
+			//加载文档资源
 			Document doc = doLoadDocument(inputSource, resource);
+			//注册给定DOM文档中包含的bean定义
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + resource);
@@ -413,6 +415,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 使用配置的DocumentLoader加载指定的文档
+	 * getValidationModeForResource方法：用来判断xml文件使用DTD模式还是XSD模式校验
+	 *
+	 * getEntityResolver方法：提供一个如何 DTD 声明的方法，即由程序来实现寻找 DTD 声明的过程，
+	 * 比如我们将 DTD 文件放到项目中某处，在实现时直接将此文档读取并返回给 SAX 即可，
+	 * 这样就避免了通过网络来找相应的声明，在网络不可用时报错。
+	 *
 	 * Actually load the specified document using the configured DocumentLoader.
 	 * @param inputSource the SAX InputSource to read from
 	 * @param resource the resource descriptor for the XML file
@@ -427,6 +436,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 确定指定的{@link资源}的验证模式(DTD或XSD)。
+	 * 如果未配置任何明确的验证模式，则验证模式将从给定资源中获取{@link #detectValidationMode}。
+	 *
 	 * Determine the validation mode for the specified {@link Resource}.
 	 * If no explicit validation mode has been configured, then the validation
 	 * mode gets {@link #detectValidationMode detected} from the given resource.
@@ -436,20 +448,26 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int getValidationModeForResource(Resource resource) {
 		int validationModeToUse = getValidationMode();
+		//如果手动指定了验证模式则使用指定的验证模式
 		if (validationModeToUse != VALIDATION_AUTO) {
 			return validationModeToUse;
 		}
 		int detectedMode = detectValidationMode(resource);
+		//如果未指定则使用自动检测
 		if (detectedMode != VALIDATION_AUTO) {
 			return detectedMode;
 		}
 		// Hmm, we didn't get a clear indication... Let's assume XSD,
 		// since apparently no DTD declaration has been found up until
 		// detection stopped (before finding the document's root tag).
+		//默认返回XSD模式
 		return VALIDATION_XSD;
 	}
 
 	/**
+	 * 检测对提供的{@link Resource}标识的XML文件执行哪种验证。
+	 * 如果文件具有{@code DOCTYPE} 定义，则使用DTD验证，否则采用XSD验证。
+	 *
 	 * Detect which kind of validation to perform on the XML file identified
 	 * by the supplied {@link Resource}. If the file has a {@code DOCTYPE}
 	 * definition then DTD validation is used otherwise XSD validation is assumed.
@@ -486,6 +504,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 注册给定DOM文档中包含的bean定义
+	 *
 	 * Register the bean definitions contained in the given DOM document.
 	 * Called by {@code loadBeanDefinitions}.
 	 * <p>Creates a new instance of the parser class and invokes
@@ -506,6 +526,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 创建{@link BeanDefinitionDocumentReader}，以用于真正从XML文档中读取bean定义
+	 *
 	 * Create the {@link BeanDefinitionDocumentReader} to use for actually
 	 * reading bean definitions from an XML document.
 	 * <p>The default implementation instantiates the specified "documentReaderClass".
