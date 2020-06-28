@@ -1,14 +1,11 @@
 package com.example;
 
-import com.example.bean.User;
 import com.example.config.Testconfig;
 import com.example.service.TestService;
 import org.junit.Test;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.Arrays;
@@ -24,8 +21,8 @@ public class TestBean {
 
 	@Test
 	public void testService() {
-//		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(Testconfig.class);
-//		applicationContext.getBean(TestService.class).test();
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(Testconfig.class);
+		applicationContext.getBean(TestService.class).test();
 	}
 
 	@Test
@@ -38,12 +35,13 @@ public class TestBean {
 		ClassPathResource resource = new ClassPathResource("web.xml");
 		//装载资源
 		reader.loadBeanDefinitions(resource);
-//		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("web.xml");
-//		User user = (User) context.getBean("user");
-//		user.setName("小红");
-//		System.out.println(user.getName());
 		String beans = Arrays.asList(registry.getBeanDefinitionNames()).toString();
 		System.out.println(beans);
+
+		//ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("web.xml");
+		//User user = (User) context.getBean("user");
+		//user.setName("小红");
+		//System.out.println(user.getName());
 
 	}
 }
