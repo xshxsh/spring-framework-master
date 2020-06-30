@@ -44,7 +44,9 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * 对 bean 注册后的处理
+ * 实现接口 ConfigurableListableBeanFactory、BeanDefinitionRegistry（bean定义的注册接口），
+ * 并继承AbstractAutowireCapableBeanFactory，实现全部类管理的功能。
+ *
  *
  * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
  * and {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
