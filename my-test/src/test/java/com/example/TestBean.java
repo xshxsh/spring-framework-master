@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -39,5 +40,13 @@ public class TestBean {
 		user.setName("小红");
 		System.out.println(user.getName());
 
+	}
+
+	@Test
+	public void testBean2(){
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("web.xml");
+		User user = context.getBean("user", User.class);
+		user.setName("小明");
+		System.out.println(user.getName());
 	}
 }
