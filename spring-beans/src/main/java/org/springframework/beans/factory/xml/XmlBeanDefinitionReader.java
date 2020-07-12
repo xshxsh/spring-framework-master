@@ -239,6 +239,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 设置要用于解析的SAX实体解析器
+	 *
 	 * Set a SAX entity resolver to be used for parsing.
 	 * <p>By default, {@link ResourceEntityResolver} will be used. Can be overridden
 	 * for custom entity resolution, for example relative to some specific base path.
@@ -248,6 +250,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 构建默认解析器
+	 *
 	 * Return the EntityResolver to use, building a default resolver
 	 * if none specified.
 	 */
@@ -315,9 +319,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			logger.trace("Loading XML bean definitions from " + encodedResource);
 		}
 
-		//本地线程
+		//ThreadLocal，保证加载资源时线程安全和高效
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
-
+		//添加source前判断是否已存在加载过的source，避免循环加载
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
@@ -339,6 +343,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		finally {
 			currentResources.remove(encodedResource);
 			if (currentResources.isEmpty()) {
+				//使用ThreadLocal后及时调用remove方法，防止内存泄漏
 				this.resourcesCurrentlyBeingLoaded.remove();
 			}
 		}
@@ -384,9 +389,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throws BeanDefinitionStoreException {
 
 		try {
-			//加载文档资源
+			//把source封装成Document
 			Document doc = doLoadDocument(inputSource, resource);
-			//注册给定DOM文档中包含的bean定义
+			//根据Document注册bean信息
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + resource);
@@ -419,12 +424,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * 使用配置的DocumentLoader加载指定的文档
-	 * getValidationModeForResource方法：用来判断xml文件使用DTD模式还是XSD模式校验
+	 * 使用配置的DocumentLoader加载指定的文档。
 	 *
-	 * getEntityResolver方法：提供一个如何 DTD 声明的方法，即由程序来实现寻找 DTD 声明的过程，
-	 * 比如我们将 DTD 文件放到项目中某处，在实现时直接将此文档读取并返回给 SAX 即可，
-	 * 这样就避免了通过网络来找相应的声明，在网络不可用时报错。
+	 * getEntityResolver方法：spring是使用SAX解析XML文档的，在解析XML文档时，SAX首先读取该XML
+	 * 档上的明，根据声明去寻找相应的DTD定义，以便对文档进行一个验证。默认的寻找规则，
+	 * 就是通过网络（实现上就是声明的DTDURI地址）来下载相应的DTD声明，并进行认证。
+	 * 而下载的过程是一个漫长的过程，而且当网络中断或不可用时，这里会报错，就是因为相应的DTD
+	 * 声明没有被找到的原因。
+	 * EntityResolver方法的作用是项目本身就可以提供一个如何寻找DTD声明的方法，即由程序来
+	 * 实现寻找DTD声明的过程，比如我们将DTD文件放到项目中某处，在实现时直接将此文档读
+	 * 取并返回给SAX即可，这样就避免了通过网络来找相应的声明。默认情况下，spring的DTD文件放在此路径：
+	 * /org/springframework/beans/factory/xml/
+	 *
+	 * getValidationModeForResource方法：用来判断xml文件使用DTD模式还是XSD模式校验。
 	 *
 	 * Actually load the specified document using the configured DocumentLoader.
 	 * @param inputSource the SAX InputSource to read from
