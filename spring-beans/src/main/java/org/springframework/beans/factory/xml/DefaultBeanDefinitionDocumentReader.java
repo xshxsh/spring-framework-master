@@ -84,6 +84,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 
 	/**
+	 * 此实现根据“ spring-beans” XSD *（或DTD，历史上）来解析bean定义。
+	 * 打开DOM文档；然后初始化在{@code <beans />}级别指定的默认设置；然后解析包含的bean定义。
+	 *
 	 * This implementation parses bean definitions according to the "spring-beans" XSD
 	 * (or DTD, historically).
 	 * <p>Opens a DOM Document; then initializes the default settings
@@ -115,6 +118,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	/**
 	 * 在给定的根{@code <beans />}元素中注册每个bean定义。
+	 * 任何嵌套的<beans>元素都将导致此方法中的递归
 	 *
 	 * Register each bean definition within the given root {@code <beans/>} element.
 	 */
@@ -173,6 +177,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		//如果是默认的命名空间
 		if (delegate.isDefaultNamespace(root)) {
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {

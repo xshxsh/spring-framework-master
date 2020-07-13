@@ -252,6 +252,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * 构建默认解析器
 	 *
+	 * ResourceEntityResolver实际是继承自DelegatingEntityResolver，先调用父类的resolveEntity方法获取inputSource，如果获取不到，
+	 * 说明声明文件不存放在默认的目录，再去项目目录下找声明文件，如果再找不到就通过网络下载
+	 *
 	 * Return the EntityResolver to use, building a default resolver
 	 * if none specified.
 	 */
@@ -426,15 +429,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * 使用配置的DocumentLoader加载指定的文档。
 	 *
-	 * getEntityResolver方法：spring是使用SAX解析XML文档的，在解析XML文档时，SAX首先读取该XML
-	 * 档上的明，根据声明去寻找相应的DTD定义，以便对文档进行一个验证。默认的寻找规则，
-	 * 就是通过网络（实现上就是声明的DTDURI地址）来下载相应的DTD声明，并进行认证。
-	 * 而下载的过程是一个漫长的过程，而且当网络中断或不可用时，这里会报错，就是因为相应的DTD
-	 * 声明没有被找到的原因。
-	 * EntityResolver方法的作用是项目本身就可以提供一个如何寻找DTD声明的方法，即由程序来
-	 * 实现寻找DTD声明的过程，比如我们将DTD文件放到项目中某处，在实现时直接将此文档读
-	 * 取并返回给SAX即可，这样就避免了通过网络来找相应的声明。默认情况下，spring的DTD文件放在此路径：
-	 * /org/springframework/beans/factory/xml/
+	 * Spring是使用SAX解析XML文档的，在解析XML文档时，SAX首先读取该XML档上的声明，根据声明去寻找相应的DTD定义，以便对文档进行一个验证。
+	 * 默认的寻找规则，就是通过网络（实现上就是声明的DTD URI地址）来下载相应的DTD声明，并进行认证。
+	 * 而下载的过程是一个漫长的过程，而且当网络中断或不可用时，这里会报错，就是因为相应的DTD声明没有被找到的原。
+	 * getEntityResolver方法的作用是项目本身就可以提供一个如何寻找DTD声明的方法，比如我们将DTD文件放到项目中某处，
+	 * 在实现时直接将此文档读取并返回给SAX即可，这样就避免了通过网络来找相应的声明。
+	 * 默认情况下，Spring的DTD文件放在此路径： org/springframework/beans/factory/xml/，
+	 * Spring会首先从这个目录去获取规范文件，如果找不到再去网络下载。
 	 *
 	 * getValidationModeForResource方法：用来判断xml文件使用DTD模式还是XSD模式校验。
 	 *
@@ -535,9 +536,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		//使用 DefaultBeanDefinitionDocumentReader 实例化 BeanDefinitionDocumentReader
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+		//记录已存在的BeanDefinition的个数
 		int countBefore = getRegistry().getBeanDefinitionCount();
+		//重点：加载及注册bean
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+		//统计此次加载的BeanDefinition的个数
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
 

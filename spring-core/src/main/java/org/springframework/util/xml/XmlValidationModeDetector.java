@@ -16,14 +16,10 @@
 
 package org.springframework.util.xml;
 
-import java.io.BufferedReader;
-import java.io.CharConversionException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.*;
 
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
@@ -81,6 +77,9 @@ public class XmlValidationModeDetector {
 
 
 	/**
+	 * 在提供的{@link InputStream}中检测XML文档的验证模式
+	 *  如果文件具有{@code DOCTYPE} 定义，则使用DTD验证，否则采用XSD验证。
+	 *
 	 * Detect the validation mode for the XML document in the supplied {@link InputStream}.
 	 * Note that the supplied {@link InputStream} is closed by this method before returning.
 	 * @param inputStream the InputStream to parse

@@ -16,19 +16,18 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * {@code EntityResolver} implementation that tries to resolve entity references
@@ -47,9 +46,9 @@ import org.springframework.lang.Nullable;
  * will be interpreted relative to the application context too.
  *
  * @author Juergen Hoeller
- * @since 31.07.2003
  * @see org.springframework.core.io.ResourceLoader
  * @see org.springframework.context.ApplicationContext
+ * @since 31.07.2003
  */
 public class ResourceEntityResolver extends DelegatingEntityResolver {
 
@@ -61,45 +60,51 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	/**
 	 * Create a ResourceEntityResolver for the specified ResourceLoader
 	 * (usually, an ApplicationContext).
+	 *
 	 * @param resourceLoader the ResourceLoader (or ApplicationContext)
-	 * to load XML entity includes with
+	 *                       to load XML entity includes with
 	 */
 	public ResourceEntityResolver(ResourceLoader resourceLoader) {
 		super(resourceLoader.getClassLoader());
 		this.resourceLoader = resourceLoader;
 	}
 
-
 	@Override
 	@Nullable
 	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId)
 			throws SAXException, IOException {
 
+		//systemId其实就是XML文件的规范，如：http://www.springframework.org/schema/beans/spring-beans.xsd
+		//调用父类的resolveEntity方法获取inputSource
 		InputSource source = super.resolveEntity(publicId, systemId);
 
 		if (source == null && systemId != null) {
 			String resourcePath = null;
 			try {
+				//如果调用父类获取失败，那么首先会获取项目运行的绝对路径
 				String decodedSystemId = URLDecoder.decode(systemId, "UTF-8");
 				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURI().toURL().toString();
 				// Try relative to resource base if currently in system root.
+				//然后判断配置文件里面配置的url是不是用项目绝对路径开头的
 				if (givenUrl.startsWith(systemRootUrl)) {
+					//如果是的话，说明文件是根据项目名自定义配置的，那么截取绝对路径后面的路径，即相对路径,作为resource
 					resourcePath = givenUrl.substring(systemRootUrl.length());
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				// Typically a MalformedURLException or AccessControlException.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not resolve XML entity [" + systemId + "] against system root URL", ex);
 				}
 				// No URL (or no resolvable URL) -> try relative to resource base.
+				//如果上面解码配置文件里面的路径有异常或者无法获取项目路径，就会直接把这个文档配置的systemId作为resource
 				resourcePath = systemId;
 			}
 			if (resourcePath != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Trying to locate XML entity [" + systemId + "] as resource [" + resourcePath + "]");
 				}
+				//最后通过resourceLoader获取inputSource，其实就是通过网络下载声明文件
 				Resource resource = this.resourceLoader.getResource(resourcePath);
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
@@ -107,8 +112,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found XML entity [" + systemId + "]: " + resource);
 				}
-			}
-			else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
+			} else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
 				// External dtd/xsd lookup via https even for canonical http declaration
 				String url = systemId;
 				if (url.startsWith("http:")) {
@@ -118,8 +122,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 					source = new InputSource(new URL(url).openStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not resolve XML entity [" + systemId + "] through URL [" + url + "]", ex);
 					}
