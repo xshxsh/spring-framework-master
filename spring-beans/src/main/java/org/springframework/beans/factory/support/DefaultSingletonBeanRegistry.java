@@ -64,28 +64,35 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Maximum number of suppressed exceptions to preserve. */
 	private static final int SUPPRESSED_EXCEPTIONS_LIMIT = 100;
 
-
+	//Spring三级缓存
 	/** Cache of singleton objects: bean name to bean instance. */
+	//一级缓存:单例对象的高速缓存：bean名称到bean实例
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
+	//三级缓存:单例工厂缓存：Bean名称到ObjectFactory
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name to bean instance. */
+	//二级缓存:早期的单例对象的高速缓存：Bean名称到Bean实例
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
+	//已注册的单例集，按注册顺序包含Bean名称
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation. */
+	//当前正在创建的bean的名称
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/** Names of beans currently excluded from in creation checks. */
+	//当前从创建检查中排除的bean名称
 	private final Set<String> inCreationCheckExclusions =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/** Collection of suppressed Exceptions, available for associating related causes. */
+	//抑制异常的集合，可用于关联相关原因
 	@Nullable
 	private Set<Exception> suppressedExceptions;
 
@@ -169,15 +176,22 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		//先从一级缓存中加载实例
 		Object singletonObject = this.singletonObjects.get(beanName);
+		//如果一级缓存找不到，并且对象正在创建中
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
+				//从二级缓存中找
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				//如果二级缓存还找不到，并且从三级缓存中找(不等bean完全创建完就提前把创建bean的ObjectFactory曝光出来)
 				if (singletonObject == null && allowEarlyReference) {
+					//从三级缓存中找
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
+						//把三级缓存找到的bean提到二级缓存中
 						this.earlySingletonObjects.put(beanName, singletonObject);
+						//删除三级缓存中的bean
 						this.singletonFactories.remove(beanName);
 					}
 				}

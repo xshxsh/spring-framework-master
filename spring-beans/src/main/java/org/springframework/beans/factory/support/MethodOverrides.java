@@ -16,13 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * 方法重写集，确定在运行时Spring IoC容器将重写管理对象上的哪些方法（如果有）
+ *
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
  *
